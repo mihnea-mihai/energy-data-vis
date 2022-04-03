@@ -1,0 +1,28 @@
+---
+title: "Renewable energy Data Visualisation"
+author: "Mihnea Mihai & Catalina Coman"
+date: '2022-04-03'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("readxl")
+```
+# Introduction
+
+Using this dataset we aim to present an updated and meaningful report on the
+share and historic evolution of renewables in the European energy mix.
+
+Our dataset comprises information for the last 20 years on the energy
+production and the sources which contributed to the energy mix.
+
+```{r}
+df <- read_excel('Data-file-Europe-Power-Sector-2020.xlsx')
+summary(df)
+```
+
+``` {r}
+head(df, n=(3))
+tail(df, n=(3))
+```
