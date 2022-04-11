@@ -6,8 +6,9 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library("readxl")
+library("dplyr")
+library("ggplot2")
 ```
 # Introduction
 
@@ -23,6 +24,41 @@ summary(df)
 ```
 
 ``` {r}
-head(df, n=(3))
-tail(df, n=(3))
+data <- df %>%
+  select(year = Year, country = Area, type = Variable, TWh = `Generation (TWh)`)
 ```
+
+``` {r}
+data <- as.data.frame(unclass(data), # https://statisticsglobe.com/convert-character-to-factor-in-r             
+                      stringsAsFactors = TRUE)
+```
+
+```{r}
+data %>%
+  filter(country == "Romania") %>%
+  select(!country) %>%
+  group_by(year) %>%
+  ggplot() +
+    geom_line(aes(x = year, y = TWh, color = type))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
