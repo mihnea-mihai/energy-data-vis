@@ -32,7 +32,7 @@ ui <- fluidPage(
                               "Greece", "Hungary", "Ireland", "Italy", "Latvia",
                               "Lithuania", "Luxembourg", "Malta", "Netherlands",
                               "Poland", "Portugal", "Romania", "Slovakia",
-                              "Slovenia", "Spain", "Sweden", "United Kingdom")
+                              "Slovenia", "Spain", "Sweden", "United Kingdom"),
                   selected = "Romania")
     ),
     
