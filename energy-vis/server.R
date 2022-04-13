@@ -1,61 +1,30 @@
----
-title: "Renewable energy Data Visualisation"
-author: "Mihnea Mihai & Catalina Coman"
-date: '2022-04-03'
-output: html_document
----
+#
+# This is a Shiny web application. You can run the application by clicking
+# the 'Run App' button above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
 
-```{r setup, include=FALSE}
+library(shiny)
 library("httr")
 library("readxl")
 library("dplyr")
 library("ggplot2")
 library("scales")
-```
-# Introduction
-
-Using this dataset we aim to present an updated and meaningful report on the
-share and historic evolution of renewables in the European energy mix.
-
-Our dataset comprises information for the last 20 years on the energy
-production and the sources which contributed to the energy mix.
-
-# Preprocessing
-
-## Importing
-
-Fetch the data from the Web.
-
-```{r message=FALSE, warning=FALSE, error=FALSE, results='hide', include=FALSE, echo=FALSE}
 GET("https://query.data.world/s/dpqucaqcnzwoj45c4ft6mxihxzmmpe",
-     write_disk(tf <- tempfile(fileext = ".xlsx")))
-```
-
-Parse and preview.
-
-``` {r}
+    write_disk(tf <- tempfile(fileext = ".xlsx")))
 df <- read_excel(tf)
-df
-```
-
-Select and rename relevant columns.
-
-``` {r}
 data <- df %>%
   select(Year = Year, Country = Area, Source = Variable,
          Generation = `Generation (TWh)`, Percent = `Share of production (%)`)
-data
-```
-Split energy sources
-
-```{r}
 sources <- list(
   fossil = c("Hard Coal", "Lignite", "Gas", "Other fossil"),
   renewable = c("Hydro", "Wind", "Solar", "Bioenergy", "Other renewables"),
   nuclear = c("Nuclear")
 )
 sources$base <- c(sources$renewable, sources$fossil, sources$nuclear)
-sources
 sources$palette <- list("Hard Coal" = "gray10",
                         "Lignite" = "saddlebrown",
                         "Gas" = "darkgoldenrod",
@@ -66,12 +35,7 @@ sources$palette <- list("Hard Coal" = "gray10",
                         "Bioenergy" = "forestgreen",
                         "Other renewables" = "springgreen3",
                         "Nuclear" = "orchid4")
-```
 
-
-Add aggregate energy source column
-
-```{r}
 assign_broad_source <- function(src.vec) {
   res = rep_len(NA, length(src.vec))
   res[src.vec %in% sources$fossil] = "Fossil"
@@ -86,26 +50,21 @@ data <- data %>%
 
 data$Source <- factor(data$Source, levels = sources$base)
 
-data
-```
-
-
-``` {r}
-src_by_country_by_year <- function(cntr, yr) {
-  filtered_data <- data %>%
-    filter(Country == cntr & Year == yr & Source %in% sources$base)
-  filtered_data %>%
-    ggplot() +
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$energPlot <- renderPlot({
+    filtered_data <- data %>%
+      filter(Country == input$country & Year == input$year
+             & Source %in% sources$base)
+    filtered_data %>%
+      ggplot() +
       geom_col(mapping = aes(x = Broad.Source, y = Percent, fill = Source)) +
-      ggtitle(paste("Energy sources in ", cntr, " (", yr, ")", sep = "")) +
+      ggtitle(paste("Energy sources in ", input$country,
+                    " (", input$year, ")", sep = "")) +
       scale_fill_manual(values = sources$palette)
+  })
 }
 
-src_by_country_by_year("France", 2018)
-```
-
-
-
-
-
-
+# Run the application 
+shinyApp(ui = ui, server = server)
