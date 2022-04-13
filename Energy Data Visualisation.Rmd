@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library("httr")
 library("readxl")
 library("dplyr")
 library("ggplot2")
@@ -18,40 +19,55 @@ share and historic evolution of renewables in the European energy mix.
 Our dataset comprises information for the last 20 years on the energy
 production and the sources which contributed to the energy mix.
 
-```{r}
-df <- read_excel('Data-file-Europe-Power-Sector-2020.xlsx')
-summary(df)
+# Preprocessing
+
+## Importing
+
+Fetch the data from the Web.
+
+```{r message=FALSE, warning=FALSE, error=FALSE, results='hide', include=FALSE, cache=TRUE}
+GET("https://query.data.world/s/dpqucaqcnzwoj45c4ft6mxihxzmmpe",
+     write_disk(tf <- tempfile(fileext = ".xlsx")))
 ```
+
+Parse and preview.
+
+``` {r}
+df <- read_excel(tf)
+df
+```
+
+Select and rename relevant columns.
 
 ``` {r}
 data <- df %>%
-  select(year = Year, country = Area, type = Variable, TWh = `Generation (TWh)`)
+  select(year = Year, country = Area, esource = Variable,
+         TWh = `Generation (TWh)`, percent = `Share of production (%)`)
+data
 ```
 
-``` {r}
-data <- as.data.frame(unclass(data), # https://statisticsglobe.com/convert-character-to-factor-in-r             
-                      stringsAsFactors = TRUE)
-```
+
 
 ```{r}
 data %>%
   filter(country == "Romania") %>%
+  filter(esource %in% c("Fossil", "Renewables", "Nuclear")) %>%
   select(!country) %>%
   group_by(year) %>%
   ggplot() +
-    geom_line(aes(x = year, y = TWh, color = type))
+    geom_line(aes(x = year, y = TWh, color = esource))
 ```
 
 
 
-
-
-
-
-
-
-
-
+```{r message=FALSE, warning=FALSE}
+data %>%
+  filter(esource %in% c("Fossil", "Renewables", "Nuclear")) %>%
+  group_by(year, esource) %>%
+  summarise(total = sum(TWh)) %>%
+  ggplot() +
+    geom_line(aes(x = year, y = total, color = esource))
+```
 
 
 
