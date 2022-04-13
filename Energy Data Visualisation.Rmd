@@ -25,7 +25,7 @@ production and the sources which contributed to the energy mix.
 
 Fetch the data from the Web.
 
-```{r message=FALSE, warning=FALSE, error=FALSE, results='hide', include=FALSE, cache=TRUE}
+```{r message=FALSE, warning=FALSE, error=FALSE, results='hide', include=FALSE, echo=FALSE}
 GET("https://query.data.world/s/dpqucaqcnzwoj45c4ft6mxihxzmmpe",
      write_disk(tf <- tempfile(fileext = ".xlsx")))
 ```
@@ -41,39 +41,86 @@ Select and rename relevant columns.
 
 ``` {r}
 data <- df %>%
-  select(year = Year, country = Area, esource = Variable,
+  select(year = Year, country = Area, source = Variable,
          TWh = `Generation (TWh)`, percent = `Share of production (%)`)
 data
 ```
+Split energy sources
+```{r}
+unique(data$source)
+```
+```{r}
+sources.base <- c("Coal", "Hard Coal", "Lignite", "Gas", "Other fossil",
+                  "Nuclear", "Hydro", "Wind", "Solar", "Bioenergy", 
+                  "Other renewables")
+sources.aggregate <- c("Fossil", "Renewables", "Nuclear")
+```
+
+Add aggregate energy source column
+
+```{r}
+assign_broad_source <- function(src.vec) {
+  res = rep_len(NA, length(src.vec))
+  res[src.vec %in% c("Coal", "Hard Coal", "Lignite", "Gas", "Other fossil")
+      ] = "Fossil"
+  res[src.vec %in% c("Hydro", "Wind", "Solar", "Bioenergy", "Other renewables")
+      ] = "Renewables"
+  res[src.vec %in% c("Nuclear")] = "Nuclear"
+  return(res)
+}
+
+data <- data %>%
+  mutate(Broad.Source = assign_broad_source(source))
+```
+
+
 
 
 
 ```{r}
 data %>%
   filter(country == "Romania") %>%
-  filter(esource %in% c("Fossil", "Renewables", "Nuclear")) %>%
+  filter(source %in% sources.aggregate) %>%
   select(!country) %>%
   group_by(year) %>%
   ggplot() +
-    geom_line(aes(x = year, y = TWh, color = esource))
+    geom_line(aes(x = year, y = TWh, color = source))
 ```
 
 
 
 ```{r message=FALSE, warning=FALSE}
 data %>%
-  filter(esource %in% c("Fossil", "Renewables", "Nuclear")) %>%
-  group_by(year, esource) %>%
+  filter(source %in% c("Fossil", "Renewables", "Nuclear")) %>%
+  group_by(year, source) %>%
   summarise(total = sum(TWh)) %>%
   ggplot() +
-    geom_line(aes(x = year, y = total, color = esource))
+    geom_line(aes(x = year, y = total, color = source))
 ```
 
 
+```{r}
+data
+```
 
 
+``` {r}
+src_by_country_by_year <- function(cntr, yr) {
+  data %>%
+    filter(country == cntr & year == yr & source %in% sources.base) %>%
+    ggplot() +
+    geom_col(mapping = aes(x = Broad.Source, y = percent, fill = source)) +
+    ggtitle(paste("Energy sources in ", cntr, " (", yr, ")", sep = ""))
+}
+
+src_by_country_by_year("Germany", 2015)
+```
 
 
+```{r}
+data %>%
+  filter(source == "Other renewables" & TWh > 0)
+```
 
 
 
