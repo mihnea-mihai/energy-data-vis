@@ -26,7 +26,13 @@ ui <- fluidPage(
                   sep = ""),
       selectInput("country",
                   "Country",
-                  choices = unique(data$Country),
+                  choices = c("Austria", "Belgium", "Bulgaria", "Croatia",
+                              "Cyprus", "Czech Republic", "Denmark", "Estonia",
+                              "EU-27", "EU27+1", "Finland", "France", "Germany",
+                              "Greece", "Hungary", "Ireland", "Italy", "Latvia",
+                              "Lithuania", "Luxembourg", "Malta", "Netherlands",
+                              "Poland", "Portugal", "Romania", "Slovakia",
+                              "Slovenia", "Spain", "Sweden", "United Kingdom")
                   selected = "Romania")
     ),
     
