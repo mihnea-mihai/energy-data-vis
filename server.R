@@ -54,15 +54,15 @@ data$Source <- factor(data$Source, levels = sources$base)
 server <- function(input, output) {
   
   output$energPlot <- renderPlot({
-    filtered_data <- data %>%
-      filter(Country == input$country & Year == input$year
-             & Source %in% sources$base)
-    filtered_data %>%
+    data %>%
+      filter(Country == input$country & Year == input$year) %>%
       ggplot() +
-      geom_col(mapping = aes(x = Broad.Source, y = Percent, fill = Source)) +
-      ggtitle(paste("Energy sources in ", input$country,
-                    " (", input$year, ")", sep = "")) +
-      scale_fill_manual(values = sources$palette)
+        geom_col(aes(x = Broad.Source, y = Percent, fill = Source)) +
+        ggtitle(paste("Energy sources in ", input$country,
+                      " (", input$year, ")", sep = "")) +
+        scale_fill_manual(values = sources$palette) +
+        ylim(c(0,100)) +
+        theme(legend.text = element_text(size = 16))
   })
 }
 

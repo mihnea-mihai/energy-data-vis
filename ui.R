@@ -15,15 +15,41 @@ ui <- fluidPage(
   # Application title
   titlePanel("Energy sources per Country per Year"),
   
-  # Sidebar with a slider input for number of bins 
-  sidebarLayout(
-    sidebarPanel(
+  # # Sidebar with a slider input for number of bins 
+  # sidebarLayout(
+  #   sidebarPanel(
+  #     sliderInput("year",
+  #                 "Year",
+  #                 min = 2000, max = 2020, value = 2000, sep = "",
+  #                 animate = animationOptions(interval = 500)),
+  #     selectInput("country",
+  #                 "Country",
+  #                 choices = c("Austria", "Belgium", "Bulgaria", "Croatia",
+  #                             "Cyprus", "Czech Republic", "Denmark", "Estonia",
+  #                             "EU-27", "EU27+1", "Finland", "France", "Germany",
+  #                             "Greece", "Hungary", "Ireland", "Italy", "Latvia",
+  #                             "Lithuania", "Luxembourg", "Malta", "Netherlands",
+  #                             "Poland", "Portugal", "Romania", "Slovakia",
+  #                             "Slovenia", "Spain", "Sweden", "United Kingdom"),
+  #                 selected = "Romania")
+  #   ),
+  #   
+  #   # Show a plot of the generated distribution
+  #   mainPanel(
+  #     plotOutput("energPlot")
+  #   )
+  # )
+  fluidRow(
+    plotOutput("energPlot")
+  ),
+  fluidRow(
+    column(5, offset = 1,
       sliderInput("year",
                   "Year",
-                  min = 2000,
-                  max = 2020,
-                  value = 2010,
-                  sep = ""),
+                  min = 2000, max = 2020, value = 2000, sep = "",
+                  animate = animationOptions(interval = 1000))
+      ),
+    column(6,
       selectInput("country",
                   "Country",
                   choices = c("Austria", "Belgium", "Bulgaria", "Croatia",
@@ -35,10 +61,5 @@ ui <- fluidPage(
                               "Slovenia", "Spain", "Sweden", "United Kingdom"),
                   selected = "Romania")
     ),
-    
-    # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("energPlot")
-    )
   )
 )
