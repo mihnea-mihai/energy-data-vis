@@ -1,7 +1,10 @@
 ---
 title: "Data Visualisation - Europe Energy Production"
 author: "Mihnea Mihai & Catalina Coman"
-output: html_notebook
+output: 
+  html_notebook: 
+    theme: darkly 
+    highlight: breezedark
 ---
 
 # Introduction
@@ -16,9 +19,9 @@ library(httr)
 library(readxl)
 ```
 
-# Preprocessing
+# Preprocessing {.tabset}
 
-## Import raw
+## Import
 
 ```{r import, results='hide'}
 # embed code from https://data.world/makeovermonday/2021w5
@@ -27,14 +30,117 @@ GET("https://query.data.world/s/rnsywm4k4ae3vz2iitu6cg4sww6xbc",
 raw <- read_excel(tf)
 ```
 
-## Preview
 
-```{r raw-preview}
+```{r} 
 raw
+```
+
+## Refactor
+
+```{r}
+data <- raw %>%
+  select(Year = Year, Country = Area, Source = Variable, 
+         Production = `Generation (TWh)`) %>%
+  mutate(across(c(Country, Source), factor))
+
+data$Year <- as.integer(data$Year)
+```
+
+
+```{r }
+data
+```
+
+
+## Handle Sources
+
+### Define Source types
+
+```{r}
+sources <- list(
+  fossil = c("Hard Coal", "Lignite", "Gas", "Other fossil"),
+  renewable = c("Hydro", "Wind", "Solar", "Bioenergy", "Other renewables"),
+  nuclear = c("Nuclear")
+)
+sources$base <- c(sources$renewable, sources$fossil, sources$nuclear)
+sources$palette <- c("Hard Coal" = "gray10",
+                     "Lignite" = "saddlebrown",
+                     "Gas" = "darkgoldenrod",
+                     "Other fossil" = "darkgray",
+                     "Hydro" = "royalblue",
+                     "Wind" = "deepskyblue",
+                     "Solar" = "gold",
+                     "Bioenergy" = "forestgreen",
+                     "Other renewables" = "springgreen3",
+                     "Nuclear" = "orchid4")
+
+sources$broad.palette <- c("Fossil" = "saddlebrown",
+                           "Nuclear" = "orchid4",
+                           "Renewables" = "forestgreen")
+```
+
+### Add Broad Source
+
+```{r}
+data <- data %>%
+  mutate(Broad.Source = factor(case_when(
+    Source %in% sources$fossil ~ "Fossil",
+    Source %in% sources$nuclear ~ "Nuclear",
+    Source %in% sources$renewable ~ "Renewables"
+    ))) %>%
+  filter(!is.na(Broad.Source))
+
+data
+```
+
+## Handle Countries
+
+```{r}
+
+data <- data %>%
+  filter(!Country %in% c("EU-27", "EU27+1"))
+
+```
+
+```{r}
+data
+```
+
+
+# Plots
+
+tbd
+
+```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
+data %>%
+  group_by(Year, Broad.Source) %>%
+  summarise(Total.Production = sum(Production), .groups = "drop_last") %>%
+  ggplot(aes(x = Year, y = Total.Production, color = Broad.Source)) +
+  geom_line(size = 1) +
+  scale_color_manual(values = sources$broad.palette)
 ```
 
 
 
-# Import the data
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
