@@ -1,0 +1,40 @@
+---
+title: "Data Visualisation - Europe Energy Production"
+author: "Mihnea Mihai & Catalina Coman"
+output: html_notebook
+---
+
+# Introduction
+
+Lorem ipsum
+
+## Libraries
+
+```{r libraries, results='hide'}
+library(tidyverse)
+library(httr)
+library(readxl)
+```
+
+# Preprocessing
+
+## Import raw
+
+```{r import, results='hide'}
+# embed code from https://data.world/makeovermonday/2021w5
+GET("https://query.data.world/s/rnsywm4k4ae3vz2iitu6cg4sww6xbc", 
+    write_disk(tf <- tempfile(fileext = ".xlsx")))
+raw <- read_excel(tf)
+```
+
+## Preview
+
+```{r raw-preview}
+raw
+```
+
+
+
+# Import the data
+
+
