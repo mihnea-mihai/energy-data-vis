@@ -1,27 +1,33 @@
 ---
 title: "Data Visualisation - Europe Energy Production"
-author: "Mihnea Mihai & Catalina Coman"
-output: 
-  html_notebook: 
-    theme: darkly 
+output:
+  html_notebook:
+    theme: darkly
     highlight: breezedark
 ---
+# {.tabset}
 
-# Introduction
+## Introduction 
 
 Lorem ipsum
 
-## Libraries
+```{r include=FALSE}
+# knitr::opts_chunk$set(fig.height=7, fig.width=10, out.height=7, out.width=10)
+```
+
+
+### Libraries
 
 ```{r libraries, results='hide'}
 library(tidyverse)
 library(httr)
 library(readxl)
+library(plotly)
 ```
 
-# Preprocessing {.tabset}
+## Preprocessing {.tabset}
 
-## Import
+### Import
 
 ```{r import, results='hide'}
 # embed code from https://data.world/makeovermonday/2021w5
@@ -30,12 +36,11 @@ GET("https://query.data.world/s/rnsywm4k4ae3vz2iitu6cg4sww6xbc",
 raw <- read_excel(tf)
 ```
 
-
-```{r} 
+```{r echo=FALSE} 
 raw
 ```
 
-## Refactor
+### Refactor columns
 
 ```{r}
 data <- raw %>%
@@ -47,22 +52,36 @@ data$Year <- as.integer(data$Year)
 ```
 
 
-```{r }
+```{r}
 data
 ```
 
 
-## Handle Sources
+### Handle Sources {.tabset}
 
-### Define Source types
+#### View all Sources
+```{r}
+data %>%
+  group_by(Source) %>%
+  summarise(Total.TWh = sum(Production))
+```
+
+#### Define Source types
 
 ```{r}
 sources <- list(
   fossil = c("Hard Coal", "Lignite", "Gas", "Other fossil"),
   renewable = c("Hydro", "Wind", "Solar", "Bioenergy", "Other renewables"),
-  nuclear = c("Nuclear")
+  nuclear = c("Nuclear"),
+  demand = c("Demand")
 )
 sources$base <- c(sources$renewable, sources$fossil, sources$nuclear)
+```
+
+
+#### Define Source colors
+
+```{r}
 sources$palette <- c("Hard Coal" = "gray10",
                      "Lignite" = "saddlebrown",
                      "Gas" = "darkgoldenrod",
@@ -79,7 +98,8 @@ sources$broad.palette <- c("Fossil" = "saddlebrown",
                            "Renewables" = "forestgreen")
 ```
 
-### Add Broad Source
+
+#### Add Broad Source
 
 ```{r}
 data <- data %>%
@@ -87,39 +107,97 @@ data <- data %>%
     Source %in% sources$fossil ~ "Fossil",
     Source %in% sources$nuclear ~ "Nuclear",
     Source %in% sources$renewable ~ "Renewables"
-    ))) %>%
-  filter(!is.na(Broad.Source))
+    )))
+```
 
+```{r echo=FALSE}
 data
 ```
 
-## Handle Countries
+
+
+
+#### Filter irrelevant Sources
 
 ```{r}
-
 data <- data %>%
-  filter(!Country %in% c("EU-27", "EU27+1"))
-
+  filter(Source %in% c(sources$base, "Demand"))
 ```
 
-```{r}
+```{r echo=FALSE}
 data
 ```
 
 
-# Plots
 
-tbd
+### Handle Countries {.tabset}
+#### View all Countries
+```{r}
+data %>%
+  filter(Source == "Demand") %>%
+  group_by(Country) %>%
+  summarise(Total.Production = sum(Production))
+```
+#### Filter irrelevant Countries
+
+```{r}
+data <- data %>%
+  filter(!Country == "EU-27")
+```
+
+```{r echo=FALSE}
+data
+```
+
+
+## Plots {.tabset}
+
+### Prepare theme
+
+```{r}
+theme_update(text = element_text(size = 20, color = "gray81"),
+             rect = element_rect(fill = "gray14"),
+             axis.text = element_text(color = "gray48"),
+             panel.background = element_rect(fill = "gray10"),
+             panel.grid = element_line(color = "gray15"),
+             legend.key = element_rect(fill = "gray14")
+             )
+```
+
+```{r}
+theme_set(theme_gray())
+```
+
+### Good news
 
 ```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
-data %>%
+p <- data %>%
+  filter(!is.na(Broad.Source)) %>%
   group_by(Year, Broad.Source) %>%
   summarise(Total.Production = sum(Production), .groups = "drop_last") %>%
   ggplot(aes(x = Year, y = Total.Production, color = Broad.Source)) +
-  geom_line(size = 1) +
-  scale_color_manual(values = sources$broad.palette)
+  geom_line(size = 2) +
+  scale_color_manual(values = sources$broad.palette) +
+  theme(legend.position = "bottom") +
+  labs(title = "Energy generation sources",
+       subtitle = "EU27+1 countries") +
+  ylab("Total Generation (TWh)")
+
+p
 ```
 
+#### {.tabset}
+
+##### Static
+```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
+p
+```
+
+##### Interactive
+
+```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
+ggplotly(p)
+```
 
 
 
