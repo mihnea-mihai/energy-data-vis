@@ -108,6 +108,8 @@ src_by_country_by_year <- function(cntr, yr) {
 
 src_by_country_by_year("France", 2018)
 ```
+
+
 ``` {r}
 library(gganimate)
 src_by_country_all_yrs <- function(cntr) {
@@ -115,7 +117,8 @@ src_by_country_all_yrs <- function(cntr) {
     filter(Country == cntr & Source %in% sources$base)
   filtered_data %>%
     ggplot() +
-      geom_col(mapping = aes(x = Broad.Source, y = Percent, fill = Source, label = Year)) +
+      geom_col(mapping = aes(x = Broad.Source, y = Percent,
+                             fill = Source, label = Year)) +
       ggtitle(paste("Energy sources in", cntr, "(", ")")) +
       scale_fill_manual(values = sources$palette) +
     labs(title = "Year: {frame_time}") +

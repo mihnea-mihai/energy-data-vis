@@ -1,9 +1,10 @@
 ---
 title: "Data Visualisation - Europe Energy Production"
 output:
-  html_notebook:
+  html_document: 
     theme: darkly
     highlight: breezedark
+runtime: shiny
 ---
 # {.tabset}
 
@@ -11,10 +12,9 @@ output:
 
 Lorem ipsum
 
-```{r include=FALSE}
-# knitr::opts_chunk$set(fig.height=7, fig.width=10, out.height=7, out.width=10)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(out.width = 9, out.height = 6)
 ```
-
 
 ### Libraries
 
@@ -23,13 +23,14 @@ library(tidyverse)
 library(httr)
 library(readxl)
 library(plotly)
+library(gganimate)
 ```
 
 ## Preprocessing {.tabset}
 
 ### Import
 
-```{r import, results='hide'}
+```{r import, results='hide', cache=TRUE}
 # embed code from https://data.world/makeovermonday/2021w5
 GET("https://query.data.world/s/rnsywm4k4ae3vz2iitu6cg4sww6xbc", 
     write_disk(tf <- tempfile(fileext = ".xlsx")))
@@ -44,7 +45,7 @@ raw
 
 ```{r}
 data <- raw %>%
-  select(Year = Year, Country = Area, Source = Variable, 
+  select(Year = Year, Country = Area, Source = Variable,
          Production = `Generation (TWh)`) %>%
   mutate(across(c(Country, Source), factor))
 
@@ -75,27 +76,32 @@ sources <- list(
   nuclear = c("Nuclear"),
   demand = c("Demand")
 )
-sources$base <- c(sources$renewable, sources$fossil, sources$nuclear)
+sources$base <- c(sources$fossil, sources$renewable, sources$nuclear)
 ```
 
 
 #### Define Source colors
 
 ```{r}
-sources$palette <- c("Hard Coal" = "gray10",
+sources$palette <- c("Hard Coal" = "orangered4",
                      "Lignite" = "saddlebrown",
                      "Gas" = "darkgoldenrod",
                      "Other fossil" = "darkgray",
                      "Hydro" = "royalblue",
-                     "Wind" = "deepskyblue",
+                     "Wind" = "skyblue",
                      "Solar" = "gold",
                      "Bioenergy" = "forestgreen",
                      "Other renewables" = "springgreen3",
                      "Nuclear" = "orchid4")
 
-sources$broad.palette <- c("Fossil" = "saddlebrown",
-                           "Nuclear" = "orchid4",
-                           "Renewables" = "forestgreen")
+sources$broad.palette <- c("Renewables" = "forestgreen", 
+                           "Fossil" = "saddlebrown",
+                           "Nuclear" = "orchid4")
+
+sources$broad <- c("Fossil", "Renewables", "Nuclear")
+data <- data %>%
+  mutate(across(Source, factor, levels = c(sources$base, "Demand")))
+saveRDS(sources, "sources.rds")
 ```
 
 
@@ -104,10 +110,12 @@ sources$broad.palette <- c("Fossil" = "saddlebrown",
 ```{r}
 data <- data %>%
   mutate(Broad.Source = factor(case_when(
+    Source %in% sources$renewable ~ "Renewables",
     Source %in% sources$fossil ~ "Fossil",
-    Source %in% sources$nuclear ~ "Nuclear",
-    Source %in% sources$renewable ~ "Renewables"
+    Source %in% sources$nuclear ~ "Nuclear"
     )))
+data <- data %>%
+  mutate(across(Broad.Source, factor, levels = sources$broad))
 ```
 
 ```{r echo=FALSE}
@@ -150,6 +158,13 @@ data
 ```
 
 
+### Save
+
+```{r}
+saveRDS(data, "data.rds")
+```
+
+
 ## Plots {.tabset}
 
 ### Prepare theme
@@ -164,14 +179,14 @@ theme_update(text = element_text(size = 20, color = "gray81"),
              )
 ```
 
-```{r}
-theme_set(theme_gray())
-```
 
 ### Good news
 
-```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
-p <- data %>%
+```{r out.width = 970}
+
+# data <- readRDS("data.rds")
+# sources <- readRDS("sources.rds")
+data %>%
   filter(!is.na(Broad.Source)) %>%
   group_by(Year, Broad.Source) %>%
   summarise(Total.Production = sum(Production), .groups = "drop_last") %>%
@@ -182,23 +197,68 @@ p <- data %>%
   labs(title = "Energy generation sources",
        subtitle = "EU27+1 countries") +
   ylab("Total Generation (TWh)")
-
-p
 ```
 
-#### {.tabset}
+### Variable by country by year
 
-##### Static
-```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
-p
+``` {r}
+src_by_country_by_year <- function(country, year) {
+  filtered_data <- data %>%
+    filter(Country == country & Year == year & Source %in% sources$base)
+  filtered_data %>%
+    ggplot() +
+      geom_col(aes(x = Broad.Source, y = Production,
+                   fill = Source), width = 0.7) +
+      scale_fill_manual(values = sources$palette) +
+      labs(title = "Energy generation sources",
+           subtitle = paste(country, " (", year, ")", sep = ""))
+}
+
+src_by_country_by_year("Romania", 2010)
 ```
 
-##### Interactive
-
-```{r, fig.height=7, fig.width=10, out.height=7, out.width=10}
-ggplotly(p)
+```{r fig.width = 9.7, fig.height = 6}
+# ggplotly()
 ```
 
+
+### Variable by country
+
+```{r}
+src_by_country <- function(country) {
+  broad_data <- data %>%
+    filter(Country == country & Source %in% sources$base) %>%
+    group_by(Year, Broad.Source) %>%
+    summarise(Total.Production = sum(Production), .groups = "keep")
+  
+  demand_data <- data %>%
+    filter(Country == country & Source == "Demand")
+  
+  data %>%
+    filter(Country == country & Source %in% sources$base) %>%
+    ggplot() +
+      geom_area(aes(x = Year, y = Production, fill = Source), alpha = 1) +
+      scale_fill_manual(values = sources$palette) +
+      geom_line(data = broad_data,
+                mapping = aes(x = Year, y = Total.Production,
+                              group = Broad.Source),
+                position = "stack", size = 1) +
+      geom_line(data = demand_data,
+                mapping = aes(x = Year, y = Production),
+                color = "white", size = 1.5) +
+      labs(title = "Energy generation sources evolution",
+           subtitle = country)
+}
+
+src_by_country("Austria")
+```
+
+
+
+
+```{r}
+# ggplotly()
+```
 
 
 

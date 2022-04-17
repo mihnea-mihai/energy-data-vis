@@ -1,0 +1,46 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+# embed code from https://data.world/makeovermonday/2021w5
+GET("https://query.data.world/s/rnsywm4k4ae3vz2iitu6cg4sww6xbc", 
+    write_disk(tf <- tempfile(fileext = ".xlsx")))
+raw <- read_excel(tf)
+```
+
+
+```{r}
+data <- raw %>%
+  select(Year = Year, Country = Area, Source = Variable,
+         Production = `Generation (TWh)`,
+         Percent = `Share of production (%)`) %>%
+  mutate(across(Year, as.integer))
+```
+
+```{r}
+unique(data$Source)
+```
+
+```{r}
+sources <- list(
+  fossil = c("Hard Coal", "Lignite", "Gas", "Other fossil"),
+  renewable = c("Hydro", "Wind", "Solar", "Bioenergy", "Other renewables"),
+  nuclear = c("Nuclear"),
+  demand = c("Demand")
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
