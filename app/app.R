@@ -11,7 +11,7 @@ ui <- fluidPage(
     tabPanel("Plots by country", src_by_country_ui)
   )
 )
-
+ 
 server <- function(input, output, session) {
   output$src_by_country <-
     renderPlot({
