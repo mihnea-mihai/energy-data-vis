@@ -39,3 +39,13 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 packrat/lib*/
+
+# RSConnect
+/rsconnect/*
+
+
+# Old stuff
+/old/*
+
+# Interactive notebook
+sandbox*
