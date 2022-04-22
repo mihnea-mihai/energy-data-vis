@@ -10,7 +10,8 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                     tabsetPanel(
                       selected = "Plots by country",
                       tabPanel("Raw data", raw_data_ui),
-                      tabPanel("Plots by country", src_by_country_ui)
+                      tabPanel("Plots by country", src_by_country_ui),
+                      tabPanel("Plots by year", by_year_ui)
                     )
                   )
                 ))
@@ -39,6 +40,16 @@ server <- function(input, output, session) {
       src_by_country_by_year_lollipop(input$country, input$year)
     }) %>%
     bindCache(input$country, input$year)
+  
+  output$country_by_year_by_source_lollipop <- 
+    renderPlot({
+      country_by_year_by_source_lollipop(input$year, input$source)
+    })
+  
+  output$country_by_year_stacked  <- 
+    renderPlot({
+      country_by_year_stacked (input$year)
+    })
   
   output$raw_data <-
     renderDataTable(filter_data(input$country, input$year, input$source),
