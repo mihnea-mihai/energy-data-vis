@@ -35,4 +35,41 @@ data
 ```{r, file="../src/src_by_country.R"}
 ```
 
+# Plots by year
+
+```{r}
+country_by_year_by_source <- function(year, source) {
+  data %>%
+    filter(Year == year, Source == source, Country != "EU27+1")
+}
+
+country_by_year_by_source(2010, "Wind")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
