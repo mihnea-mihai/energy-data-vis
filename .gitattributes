@@ -1,2 +1,3 @@
 # Ignore generated HTML from Rmarkdown for language computation on GitHub
 *.nb.html linguist-generated
+*.Rmd linguist-detectable
