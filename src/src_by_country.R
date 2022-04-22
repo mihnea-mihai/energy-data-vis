@@ -105,7 +105,7 @@ src_by_country_by_year_lollipop <- function(country, year) {
 }
 
 src_by_country_ui <-
-  fluidRow(fluidRow(column(
+  fluidPage(fluidRow(column(
     width = 6,
     selectInput(
       "country",

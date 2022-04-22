@@ -37,16 +37,59 @@ data
 
 # Plots by year
 
-```{r}
-country_by_year_by_source <- function(year, source) {
+```{r, fig.height=10}
+country_by_year_by_source_lollipop <- function(year, source) {
   data %>%
-    filter(Year == year, Source == source, Country != "EU27+1")
+    filter(Year == year, Source == source, Country != "EU27+1", Production > 0) %>%
+    arrange(Production) %>%
+    mutate(Country = factor(Country, levels = Country)) %>%
+    ggplot(aes(Country, Production)) +
+    geom_segment(
+      aes(
+        x = Country,
+        xend = Country,
+        y = 0,
+        yend = Production
+      ),
+      color = "gold",
+      size = 1
+    ) +
+    geom_point(size = 4, color = "gold") +
+    coord_flip() +
+    scale_y_continuous(labels = add.TWh) +
+    labs(title = "Generated energy by source",
+         subtitle = paste(source, " (", year, ")", sep = ""))
 }
 
-country_by_year_by_source(2010, "Wind")
+country_by_year_by_source_lollipop(2020, "Solar")
 ```
 
+```{r, fig.height=10}
+country_by_year_stacked <- function(year) {
+  data %>%
+    filter(Year == year, Source == source, Country != "EU27+1", Production > 0) %>%
+    arrange(Production) %>%
+    mutate(Country = factor(Country, levels = Country)) %>%
+    ggplot(aes(Country, Production)) +
+    geom_segment(
+      aes(
+        x = Country,
+        xend = Country,
+        y = 0,
+        yend = Production
+      ),
+      color = "gold",
+      size = 1
+    ) +
+    geom_point(size = 4, color = "gold") +
+    coord_flip() +
+    scale_y_continuous(labels = add.TWh) +
+    labs(title = "Generated energy by source",
+         subtitle = paste(source, " (", year, ")", sep = ""))
+}
 
+country_by_year_stacked(2020)
+```
 
 
 
