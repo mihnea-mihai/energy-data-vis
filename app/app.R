@@ -48,6 +48,8 @@ server <- function(input, output, session) {
       options = list(pageLength = 15)
     )
   
+  session$allowReconnect(TRUE)
+  
   observe({
     val <- input$click_year$x
     updateSliderInput(session, "year", value = val)
