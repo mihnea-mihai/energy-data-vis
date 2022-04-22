@@ -11,7 +11,7 @@ ui <- fluidPage(
     tabPanel("Plots by country", src_by_country_ui)
   )
 )
- 
+
 server <- function(input, output, session) {
   output$src_by_country <-
     renderPlot({
@@ -21,12 +21,19 @@ server <- function(input, output, session) {
   
   output$src_lines_by_country <-
     renderPlot({
-      src_lines_by_country(input$country)
-    })
+      src_lines_by_country(input$country, input$year)
+    }) %>%
+    bindCache(input$country, input$year)
   
   output$src_by_country_by_year <-
     renderPlot({
       src_by_country_by_year(input$country, input$year)
+    }) %>%
+    bindCache(input$country, input$year)
+  
+  output$src_by_country_by_year_lollipop <-
+    renderPlot({
+      src_by_country_by_year_lollipop(input$country, input$year)
     }) %>%
     bindCache(input$country, input$year)
   

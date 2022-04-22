@@ -1,0 +1,38 @@
+---
+title: "Energy data vis"
+author: Mihnea Mihai & Catalina Coman
+output:
+  html_notebook:
+    theme: darkly
+    highlight: breezedark
+    toc: true
+---
+
+The magic can be seen [here](https://energy-vis.herokuapp.com/).
+
+```{r, echo=FALSE}
+library(tidyverse)
+```
+
+```{r, file="../src/preprocess.R"}
+```
+
+```{r, file="../src/sources.R"}
+```
+
+```{r, file="../src/countries.R"}
+```
+
+```{r}
+data
+```
+# Raw data
+
+```{r, file="../src/raw_data.R"}
+```
+
+# Plots by country
+```{r, file="../src/src_by_country.R"}
+```
+
+
