@@ -8,5 +8,7 @@ source("../src/countries.R")
 add.TWh <- function(x) {
   paste(x, "TWh")
 }
+
+source("../src/inputs.R")
 source("../src/raw_data.R")
 source("../src/src_by_country.R")

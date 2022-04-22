@@ -105,28 +105,7 @@ src_by_country_by_year_lollipop <- function(country, year) {
 }
 
 src_by_country_ui <-
-  fluidPage(fluidRow(column(
-    width = 6,
-    selectInput(
-      "country",
-      "Country",
-      choices = unique(data$Country),
-      selected = "EU27+1"
-    )
-  ),
-  column(
-    width = 6,
-    sliderInput(
-      "year",
-      "Year",
-      width = "100%",
-      min = min(data$Year),
-      max = max(data$Year),
-      sep = "",
-      value = mean(data$Year)
-    )
-  )),
-  fluidRow(
+  fluidPage(
     column(
       width = 6,
       plotOutput("src_by_country", click = "click_year"),
@@ -137,4 +116,4 @@ src_by_country_ui <-
       plotOutput("src_by_country_by_year"),
       plotOutput("src_by_country_by_year_lollipop")
     )
-  ))
+  )
