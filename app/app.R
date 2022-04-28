@@ -44,12 +44,14 @@ server <- function(input, output, session) {
   output$country_by_year_by_source_lollipop <- 
     renderPlot({
       country_by_year_by_source_lollipop(input$year, input$source)
-    })
+    }) %>%
+    bindCache(input$year, input$source)
   
   output$country_by_year_stacked  <- 
     renderPlot({
       country_by_year_stacked (input$year)
-    })
+    }) %>%
+    bindCache(input$year)
   
   output$raw_data <-
     renderDataTable(filter_data(input$country, input$year, input$source),
