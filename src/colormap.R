@@ -12,7 +12,8 @@ colormap = list(
     "Bioenergy" = "forestgreen",
     "Other renewables" = "springgreen3",
     "Nuclear" = "orchid4",
-    "Net imports" = "grey50"
+    "Net imports" = "grey50",
+    "Demand" = "white"
   ),
   
   broad.sources = c(

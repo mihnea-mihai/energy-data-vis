@@ -27,10 +27,10 @@ src_by_country <- function(country, year) {
     ) +
     geom_line(
       data = demand_data,
-      aes(x = Year, y = Production, group = Broad.Source),
-      color = "white",
+      aes(x = Year, y = Production, group = Broad.Source, color = Source),
       size = 1.5
     ) +
+    scale_color_manual(values = colormap$basic.sources, limits = force) +
     geom_vline(
       xintercept = year,
       color = "white",
