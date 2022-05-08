@@ -19,5 +19,11 @@ input_ui <- fluidPage(
     sep = "",
     value = mean(data$Year),
     animate = animationOptions(interval = 500)
+  ),
+  radioButtons(
+    "absolute", 
+    "Value type",
+    choiceNames = c("Absolute", "Percentages"),
+    choiceValues = c(TRUE, FALSE)
   )
 )

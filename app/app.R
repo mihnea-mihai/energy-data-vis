@@ -19,39 +19,39 @@ ui <- fluidPage(theme = shinytheme("darkly"),
 server <- function(input, output, session) {
   output$src_by_country <-
     renderPlot({
-      src_by_country(input$country, input$year)
+      src_by_country(input$country, input$year, input$absolute)
     }) %>%
-    bindCache(input$country, input$year)
+    bindCache(input$country, input$year, input$absolute)
   
   output$src_lines_by_country <-
     renderPlot({
-      src_lines_by_country(input$country, input$year)
+      src_lines_by_country(input$country, input$year, input$absolute)
     }) %>%
-    bindCache(input$country, input$year)
+    bindCache(input$country, input$year, input$absolute)
   
   output$src_by_country_by_year <-
     renderPlot({
-      src_by_country_by_year(input$country, input$year)
+      src_by_country_by_year(input$country, input$year, input$absolute)
     }) %>%
-    bindCache(input$country, input$year)
+    bindCache(input$country, input$year, input$absolute)
   
   output$src_by_country_by_year_lollipop <-
     renderPlot({
-      src_by_country_by_year_lollipop(input$country, input$year)
+      src_by_country_by_year_lollipop(input$country, input$year, input$absolute)
     }) %>%
-    bindCache(input$country, input$year)
+    bindCache(input$country, input$year, input$absolute)
   
   output$country_by_year_by_source_lollipop <- 
     renderPlot({
-      country_by_year_by_source_lollipop(input$year, input$source)
+      country_by_year_by_source_lollipop(input$year, input$source, input$absolute)
     }) %>%
-    bindCache(input$year, input$source)
+    bindCache(input$year, input$source, input$absolute)
   
   output$country_by_year_stacked  <- 
     renderPlot({
-      country_by_year_stacked (input$year)
+      country_by_year_stacked (input$year, input$absolute)
     }) %>%
-    bindCache(input$year)
+    bindCache(input$year, input$absolute)
   
   output$raw_data <-
     renderDT(mutate(data, across(c(
