@@ -1,5 +1,3 @@
-
-
 colormap = list(
   basic.sources = c(
     "Hard Coal" = "orangered4",
