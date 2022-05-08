@@ -18,6 +18,13 @@ data <- raw %>%
     Year = Year,
     Country = Area,
     Source = Variable,
-    Production = `Generation (TWh)`,
-    Percent = `Share of production (%)`
+    Production = `Generation (TWh)`
   )
+
+data <- data %>%
+  filter(Source == "Demand") %>%
+  select(-Source) %>%
+  rename(Total.Production = Production) %>%
+  merge(data) %>%
+  mutate(Percent = Production / Total.Production * 100) %>%
+  select(-Total.Production)

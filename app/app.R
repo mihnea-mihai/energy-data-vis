@@ -54,8 +54,11 @@ server <- function(input, output, session) {
     bindCache(input$year)
   
   output$raw_data <-
-    renderDataTable(filter_data(input$country, input$year, input$source),
-                    options = list(pageLength = 15))
+    renderDT(mutate(data, across(c(
+      Production, Percent
+    ), round, digits = 2)),
+    options = list(pageLength = 15),
+    style = "bootstrap") # to apply shiny theme
   
   session$allowReconnect("force")
   
