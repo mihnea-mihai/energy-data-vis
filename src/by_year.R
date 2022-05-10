@@ -24,6 +24,17 @@ country_by_year_stacked <- function(year, absolute = TRUE) {
     summarise(Total = sum(Production)) %>%
     arrange(Total)
   
+  broad_data <- data %>%
+    filter(Year == 2010, Production > 0, Broad.Source != "Demand", 
+           Country != "EU27+1") %>%
+    mutate(across(Broad.Source, factor, levels = rev(sources$broad))) %>%
+    group_by(Country, Broad.Source) %>%
+    arrange(Broad.Source) %>%
+    summarise(Subtotal = sum(Production)) %>%
+    mutate(Country = factor(Country, levels = ordered_countries$Country)) %>%
+    group_by(Country) %>%
+    summarise(Cumul = cumsum(Subtotal))
+  
   data %>%
     filter(Year == year, Country != "EU27+1", Production > 0, Source != "Demand") %>%
     mutate(Country = factor(Country, levels = ordered_countries$Country)) %>%
@@ -32,7 +43,13 @@ country_by_year_stacked <- function(year, absolute = TRUE) {
     scale_fill_manual(values = colormap$basic.sources, limits = force) +
     labs(title = "Energy mix", subtitle = year) +
     theme(legend.position = "bottom") +
-    xlab(if(absolute) "Production (TWh)" else "Percent (%)")
+    xlab(if(absolute) "Production (TWh)" else "Percent (%)") +
+    geom_segment(data = broad_data,
+                 mapping = aes(x = Cumul, xend = Cumul,
+                               y = as.numeric(Country) - 0.5,
+                               yend = as.numeric(Country) + 0.5
+                 ),
+                 inherit.aes = FALSE, color = "black", size = 1)
 }
 
 by_year_ui <-
