@@ -6,7 +6,7 @@ sources$base <- c(sources$fossil, sources$renewable, "Nuclear")
 
 data <- data %>%
   mutate(across(Source, factor,
-                levels = c(sources$base, "Demand", "Net imports"))) %>%
+                levels = c("Net imports", sources$base, "Demand"))) %>%
   filter(!is.na(Source))
 
 sources$broad <-
