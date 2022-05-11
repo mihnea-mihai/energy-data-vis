@@ -8,10 +8,11 @@ ui <- fluidPage(theme = shinytheme("darkly"),
                   mainPanel(
                     width = 10,
                     tabsetPanel(
-                      selected = "Plots by country",
+                      selected = "Country overview",
                       tabPanel("Raw data", raw_data_ui),
-                      tabPanel("Plots by country", src_by_country_ui),
-                      tabPanel("Plots by year", by_year_ui)
+                      tabPanel("Country overview", src_by_country_ui),
+                      tabPanel("Yearly energy mix", by_year_ui),
+                      tabPanel("Maps", maps_ui)
                     )
                   )
                 ))

@@ -25,7 +25,7 @@ country_by_year_stacked <- function(year, absolute = TRUE) {
     arrange(Total)
   
   broad_data <- data %>%
-    filter(Year == 2010, Production > 0, Broad.Source != "Demand", 
+    filter(Year == year, Production > 0, Broad.Source != "Demand", 
            Country != "EU27+1") %>%
     mutate(across(Broad.Source, factor, levels = rev(sources$broad))) %>%
     group_by(Country, Broad.Source) %>%
@@ -54,12 +54,5 @@ country_by_year_stacked <- function(year, absolute = TRUE) {
 
 by_year_ui <-
   fluidPage(
-    column(
-      width = 8,
-      plotOutput("country_by_year_stacked", height = "800px")
-    ),
-    column(
-      width = 4,
-      plotOutput("country_by_year_by_source_lollipop", height = "800px")
-    )
+    plotOutput("country_by_year_stacked", height = "85rem")
   )
