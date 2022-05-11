@@ -1,4 +1,5 @@
 library(maps)
+library(mapproj)
 library(cowplot)
 
 eu_map <- map_data("world") %>%

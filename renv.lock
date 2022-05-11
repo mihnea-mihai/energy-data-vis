@@ -776,6 +776,16 @@
       "Hash": "7ce2733a9826b3aeb1775d56fd305472",
       "Requirements": []
     },
+    "mapproj": {
+      "Package": "mapproj",
+      "Version": "1.2.8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "2cf1fa05b9757c1885d2ae63d96ade1d",
+      "Requirements": [
+        "maps"
+      ]
+    },
     "maps": {
       "Package": "maps",
       "Version": "3.4.0",
