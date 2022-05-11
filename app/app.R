@@ -60,6 +60,12 @@ server <- function(input, output, session) {
     options = list(pageLength = 15),
     style = "bootstrap") # to apply shiny theme
   
+  output$map_by_year_by_source <- 
+    renderPlot({
+        map_by_year_by_source(input$year, input$source, input$absolute)
+    }) %>%
+    bindCache(input$year, input$source, input$absolute)
+  
   session$allowReconnect("force")
   
   observe({
