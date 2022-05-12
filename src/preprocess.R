@@ -25,6 +25,7 @@ data <- data %>%
   rename(Total.Production = Production) %>%
   merge(data) %>%
   mutate(Percent = Production / Total.Production * 100) %>%
+  mutate(across(Year, as.integer)) %>%
   select(-Total.Production)
 
 options(dplyr.summarise.inform = FALSE)

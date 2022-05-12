@@ -1,9 +1,13 @@
-library(DT)
-
-filter_data <- function(country, year, source) {
+filter_data <- function(countries, years, sources) {
   data %>%
-    filter(Country == country, Year == year, Source == source)
+    filter(
+      Country %in% countries,
+      Year >= years[1], Year <= years[2],
+      Source %in% sources
+      )
 }
 
-raw_data_ui <-
-    mainPanel(DTOutput("raw_data"))
+prettify_data <- function(dta)
+    dta %>%
+      mutate(across(c(Production, Percent), round, digits = 2))
+

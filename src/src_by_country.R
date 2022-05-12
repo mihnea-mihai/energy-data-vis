@@ -1,24 +1,22 @@
-src_by_country <- function(country, year, absolute = TRUE) {
-  filtered <- data %>%
-    filter(Country == country)
-  
-  broad_data <- filtered %>%
-    filter(Broad.Source %in% c("Renewables", "Fossil", "Nuclear")) %>%
+src_by_country <- function(dta, country, year, absolute = TRUE) {
+  broad_data <- dta %>%
+    filter(Country == country, 
+           Broad.Source %in% c("Renewables", "Fossil", "Nuclear")) %>%
     group_by(Year, Broad.Source) %>%
     summarise(Total = sum(if(absolute) Production else Percent),
               .groups = "keep")
   
-  demand_data <- filtered %>%
-    filter(Broad.Source == "Demand")
+  demand_data <- dta %>%
+    filter(Country == country, Broad.Source == "Demand")
   
-  filtered %>%
-    filter(Source %in% sources$base) %>%
+  dta %>%
+    filter(Country == country, Source %in% sources$base) %>%
     ggplot() +
     geom_area(aes(x = Year, y = if(absolute) Production else Percent,
                   fill = Source)) +
     scale_fill_manual(values = colormap$basic.sources, limits = force) +
-    labs(title = "Detailed energy generation sources evolution",
-         subtitle = country) +
+    labs(title = "Yearly energy production evolution",
+         subtitle = paste(year, country)) +
     ylab(if(absolute) "Production (TWh)" else "Percent (%)") +
     geom_line(data = broad_data,
               aes(x = Year, y = Total, group = Broad.Source),
@@ -31,27 +29,24 @@ src_by_country <- function(country, year, absolute = TRUE) {
     geom_vline(xintercept = year, color = "white", size = 15, alpha = 0.15)
 }
 
-src_lines_by_country <- function(country, year, absolute = TRUE) {
-  data %>%
-    filter(Country == country,
-           Broad.Source %in% c("Renewables", "Fossil",
-                               "Nuclear", "Net imports")) %>%
+src_lines_by_country <- function(dta, country, year, absolute = TRUE) {
+  dta %>%
+    filter(Country == country, Source != "Demand") %>%
     mutate(Production = if_else(Production < 0, 0, Production)) %>%
     mutate(Percent = if_else(Percent < 0, 0, Percent)) %>% 
     group_by(Year, Broad.Source) %>%
-    summarise(Total = sum(if(absolute) Production else Percent), 
-              .groups = "keep") %>%
+    summarise(Total = sum(if(absolute) Production else Percent)) %>%
     ggplot(aes(x = Year, y = Total, color = Broad.Source)) +
     geom_line(size = 2) +
     scale_color_manual(values = colormap$broad.sources, limits = force) +
-    labs(title = "High-level energy generation sources evolution",
-         subtitle = country) +
-    ylab(if(absolute) "Total Production (TWh)" else "Total Percent (%)") +
+    labs(title = "Yearly energy production evolution",
+         subtitle = paste(year, country)) +
+    ylab(if(absolute) "Total Production (TWh)" else "Total Percent (%)")+
     geom_vline(xintercept = year, color = "white", size = 15, alpha = 0.15)
 }
 
-src_by_country_by_year <- function(country, year, absolute = TRUE) {
-  data %>%
+src_by_country_by_year <- function(dta, country, year, absolute = TRUE) {
+  dta %>%
     filter(Country == country, Year == year,
            Source %in% c(sources$base, "Net imports"), Production > 0) %>%
     ggplot() +
@@ -66,7 +61,7 @@ src_by_country_by_year <- function(country, year, absolute = TRUE) {
     coord_flip()
 }
 
-src_by_country_by_year_lollipop <- function(country, year, absolute = TRUE) {
+src_by_country_by_year_lollipop <- function(dta, country, year, absolute = TRUE) {
   data %>%
     filter(Country == country, Production > 0, Year == year,
            Source != "Demand") %>%
