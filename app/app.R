@@ -6,7 +6,9 @@ source("init.R")
 ui <- fluidPage(title = "EU energy visualisation",
   theme = shinytheme("darkly"),
   sidebarLayout(
-    sidebarPanel(uiOutput("input_ui"), width = 2),
+    sidebarPanel(width = 2,
+      column(width = 12, textOutput("drill_down"), uiOutput("input_ui"))
+      ),
     mainPanel(width = 10,
       tabsetPanel(
         tabPanel("Raw data", sidebarLayout(
@@ -152,6 +154,10 @@ server <- function(input, output, session) {
   observe({
     val <- input$click_year$x
     updateSliderInput(session, "year", value =val)
+  })
+  
+  output$drill_down <- renderText({
+    "Use these controls to control the plots you see."
   })
 }
 
