@@ -1,6 +1,8 @@
-country_by_year_by_source_lollipop <- function(year, source, absolute = TRUE) {
-  data %>%
-    filter(Year == year, Source == source, Country != "EU27+1", Production > 0) %>%
+country_by_year_by_source_lollipop <- 
+  function(dta, year, source, absolute = TRUE) {
+  dta %>%
+    filter(Year == year, Source == source,
+           Country != "EU27+1", Production > 0) %>%
     arrange(if(absolute) Production else Percent) %>%
     mutate(Country = factor(Country, levels = Country)) %>%
     ggplot(aes(Country, if(absolute) Production else Percent, color = Source)) +
@@ -16,27 +18,27 @@ country_by_year_by_source_lollipop <- function(year, source, absolute = TRUE) {
     theme(legend.position = "none")
 }
 
-country_by_year_stacked <- function(year, absolute = TRUE) {
-  ordered_countries <- data %>%
-    filter(Source %in% c(sources$base, "Net imports"),
-           Year == year, Production > 0) %>%
+country_by_year_stacked <- function(dta, year, absolute = TRUE) {
+  ordered_countries <- dta %>%
+    filter(Source != "Demand", Production > 0, Year == year) %>%
     group_by(Country) %>%
     summarise(Total = sum(Production)) %>%
     arrange(Total)
   
-  broad_data <- data %>%
-    filter(Year == year, Production > 0, Broad.Source != "Demand", 
-           Country != "EU27+1") %>%
+  broad_data <- dta %>%
+    filter(Production > 0, Broad.Source != "Demand", Country != "EU27+1",
+           Year == year) %>%
     mutate(across(Broad.Source, factor, levels = rev(sources$broad))) %>%
     group_by(Country, Broad.Source) %>%
     arrange(Broad.Source) %>%
-    summarise(Subtotal = sum(Production)) %>%
+    summarise(Subtotal = sum(if(absolute) Production else Percent)) %>%
     mutate(Country = factor(Country, levels = ordered_countries$Country)) %>%
     group_by(Country) %>%
     summarise(Cumul = cumsum(Subtotal))
   
-  data %>%
-    filter(Year == year, Country != "EU27+1", Production > 0, Source != "Demand") %>%
+  dta %>%
+    filter(Country != "EU27+1", Production > 0, Source != "Demand",
+           Year == year) %>%
     mutate(Country = factor(Country, levels = ordered_countries$Country)) %>%
     ggplot(aes(if(absolute) Production else Percent, Country, fill = Source)) +
     geom_col() +
@@ -51,8 +53,3 @@ country_by_year_stacked <- function(year, absolute = TRUE) {
                  ),
                  inherit.aes = FALSE, color = "black", size = 1)
 }
-
-by_year_ui <-
-  fluidPage(
-    plotOutput("country_by_year_stacked", height = "85rem")
-  )

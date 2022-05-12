@@ -23,3 +23,5 @@ data <- data %>%
     )
   )) %>%
   mutate(across(Broad.Source, factor, levels = sources$broad))
+
+all_sources <- unique(data$Source)
