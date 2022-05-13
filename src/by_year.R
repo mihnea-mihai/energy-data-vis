@@ -18,7 +18,7 @@ country_by_year_by_source_lollipop <-
     theme(legend.position = "none")
 }
 
-country_by_year_stacked <- function(dta, year, absolute = TRUE) {
+country_by_year_stacked <- function(dta, year, absolute = TRUE, broad = FALSE) {
   ordered_countries <- dta %>%
     filter(Source != "Demand", Production > 0, Year == year) %>%
     group_by(Country) %>%
@@ -40,9 +40,16 @@ country_by_year_stacked <- function(dta, year, absolute = TRUE) {
     filter(Country != "EU27+1", Production > 0, Source != "Demand",
            Year == year) %>%
     mutate(Country = factor(Country, levels = ordered_countries$Country)) %>%
-    ggplot(aes(if(absolute) Production else Percent, Country, fill = Source)) +
+    ggplot(aes(if(absolute) Production else Percent, Country,
+               fill = if(broad) Broad.Source else Source, group = Source)) +
     geom_col() +
-    scale_fill_manual(values = colormap$basic.sources, limits = force) +
+    scale_fill_manual(
+      values = if(broad) colormap$broad.sources else colormap$basic.sources,
+      limits = force
+    ) +    
+    guides(fill = guide_legend(
+      title = if(broad) "Broad source" else "Source")
+    ) +
     labs(title = "Energy mix", subtitle = year) +
     theme(legend.position = "bottom") +
     xlab(if(absolute) "Production (TWh)" else "Percent (%)") +

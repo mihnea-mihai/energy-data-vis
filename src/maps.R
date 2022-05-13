@@ -24,7 +24,36 @@ map_by_year_by_source <- function(dta, year, source, absolute = TRUE) {
   ggdraw(g) + theme(panel.background = element_rect(fill = "gray14"))
 }
 
-map_maj_source_by_year <- function(dta, year, absolute = TRUE) {
+map_maj_source_by_year <- function(dta, year, absolute = TRUE, broad = FALSE) {
+  g <- dta %>%
+    filter(Year == year, Production > 0,
+           Country != "EU27+1", Source != "Demand") %>%
+    group_by(Country) %>%
+    select(-Year) %>%
+    mutate(Rank = rank(desc(if(absolute) Production else Percent))) %>%
+    filter(Rank == 1) %>%
+    merge(eu_map, all = F) %>%
+    arrange(order) %>%
+    ggplot(aes(long, lat, group = group)) +
+    geom_polygon(color = "gray15",
+                 aes(alpha = if(absolute) Production else Percent, 
+                     fill = if(broad) Broad.Source else Source)) +
+    scale_fill_manual(
+      values = if(broad) colormap$broad.sources else colormap$basic.sources,
+      limits = force
+    ) +
+    scale_alpha_continuous(trans = "sqrt") +
+    guides(alpha = guide_legend(
+      title = if (absolute) "Production (TWh)" else "Percent (%)")
+    ) +    
+    guides(fill = guide_legend(
+      title = if (broad) "Broad Source" else "Source")
+    ) +
+    coord_map()
+  ggdraw(g) + theme(panel.background = element_rect(fill = "gray14"))
+}
+
+map_maj_broad_source_by_year <- function(dta, year, absolute = TRUE) {
   g <- dta %>%
     filter(Year == year, Production > 0,
            Country != "EU27+1", Source != "Demand") %>%

@@ -1,20 +1,25 @@
-src_by_country <- function(dta, country, year, absolute = TRUE) {
-  broad_data <- dta %>%
-    filter(Country == country, 
-           Broad.Source %in% c("Renewables", "Fossil", "Nuclear")) %>%
-    group_by(Year, Broad.Source) %>%
-    summarise(Total = sum(if(absolute) Production else Percent),
-              .groups = "keep")
+src_by_country <- function(dta, country, year, absolute = TRUE, broad = FALSE) {
+  fdata <- dta %>%
+    filter(Country == country, Source %in% sources$base)
+  
+  broad_data <- fdata %>%
+    group_by(Year, Broad.Source, Country) %>%
+    summarise(Total = sum(if(absolute) Production else Percent))
   
   demand_data <- dta %>%
     filter(Country == country, Broad.Source == "Demand")
-  
-  dta %>%
-    filter(Country == country, Source %in% sources$base) %>%
+
+  fdata %>%
     ggplot() +
     geom_area(aes(x = Year, y = if(absolute) Production else Percent,
-                  fill = Source)) +
-    scale_fill_manual(values = colormap$basic.sources, limits = force) +
+                  fill = if(broad) Broad.Source else Source, group = Source)) +
+    scale_fill_manual(
+      values = if(broad) colormap$broad.sources else colormap$basic.sources,
+      limits = force
+      ) +
+    guides(fill = guide_legend(
+        title = if(broad) "Broad source" else "Source")
+        ) +
     labs(title = "Yearly energy production evolution",
          subtitle = paste(year, country)) +
     ylab(if(absolute) "Production (TWh)" else "Percent (%)") +
@@ -23,10 +28,10 @@ src_by_country <- function(dta, country, year, absolute = TRUE) {
               position = "stack", size = 1) +
     geom_line(data = demand_data,
               aes(x = Year, y = if(absolute) Production else Percent,
-                  group = Broad.Source, color = Source),
+                  group = Broad.Source, color = Broad.Source),
               size = 1.5) +
     scale_color_manual(values = colormap$basic.sources, limits = force) +
-    geom_vline(xintercept = year, color = "white", size = 15, alpha = 0.15)
+    geom_vline(xintercept = year, color = "white", size = 15, alpha = 0.1)
 }
 
 src_lines_by_country <- function(dta, country, year, absolute = TRUE) {
@@ -42,7 +47,7 @@ src_lines_by_country <- function(dta, country, year, absolute = TRUE) {
     labs(title = "Yearly energy production evolution",
          subtitle = paste(year, country)) +
     ylab(if(absolute) "Total Production (TWh)" else "Total Percent (%)")+
-    geom_vline(xintercept = year, color = "white", size = 15, alpha = 0.15)
+    geom_vline(xintercept = year, color = "white", size = 15, alpha = 0.05)
 }
 
 src_by_country_by_year <- function(dta, country, year, absolute = TRUE) {
@@ -62,7 +67,7 @@ src_by_country_by_year <- function(dta, country, year, absolute = TRUE) {
 }
 
 src_by_country_by_year_lollipop <- function(dta, country, year, absolute = TRUE) {
-  data %>%
+  dta %>%
     filter(Country == country, Production > 0, Year == year,
            Source != "Demand") %>%
     arrange(Production) %>%
@@ -85,12 +90,12 @@ src_by_country_ui <-
   fluidPage(
     column(
       width = 6,
-      plotOutput("src_by_country", click = "click_year"),
-      plotOutput("src_lines_by_country", click = "click_year")
+      plotOutput("src_by_country", click = "click_year", height = "40rem"),
+      plotOutput("src_lines_by_country", click = "click_year", height = "40rem")
     ),
     column(
       width = 6,
-      plotOutput("src_by_country_by_year"),
-      plotOutput("src_by_country_by_year_lollipop")
+      plotOutput("src_by_country_by_year", height = "40rem"),
+      plotOutput("src_by_country_by_year_lollipop", height = "40rem")
     )
   )
